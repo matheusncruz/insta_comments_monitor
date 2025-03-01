@@ -92,13 +92,14 @@ if st.button("🚀 Executar Análise"):
         log("🔍 Analisando comentários e respostas...")
 
         def analyze_comment(text, username):
-            """ Analisar comentários e contar palavras-chave corretamente """
+            """ Analisar comentários e contar palavras-chave corretamente, incluindo palavras com caracteres especiais """
             if text:
                 log(f"   💬 {username}: {text}")
                 text_lower = text.lower()
                 for word in keyword_count.keys():
-                    occurrences = len(re.findall(fr"\b{re.escape(word)}\b", text_lower, re.IGNORECASE))
-                    keyword_count[word] += occurrences  # Somar a contagem correta
+                    word_escaped = re.escape(word.lower())  # Escapa caracteres especiais corretamente
+                    occurrences = len(re.findall(fr"\b{word_escaped}\b", text_lower, re.IGNORECASE))
+                    keyword_count[word] += occurrences  # Soma corretamente as ocorrências
 
         for index, post in enumerate(post_list):
             post_id = post["id"]
