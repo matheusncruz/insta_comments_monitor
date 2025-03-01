@@ -89,7 +89,7 @@ if st.button("🚀 Executar Análise"):
         keyword_count = {word: 0 for word in keywords}
 
         # **📌 Buscar Comentários e Respostas**
-        log("🔍 Analisando comentários...")
+        log("🔍 Analisando comentários e respostas...")
 
         def analyze_comment(text, username):
             """ Analisar comentários e contar palavras-chave corretamente """
@@ -120,6 +120,22 @@ if st.button("🚀 Executar Análise"):
                         username = comment.get("username", "Usuário desconhecido")
 
                         analyze_comment(text, username)
+
+                        # **📌 Passo 3: Buscar Respostas (Replies)**
+                        url_replies = f"https://graph.facebook.com/v18.0/{comment_id}/replies?fields=id,text,username&access_token={ACCESS_TOKEN}"
+                        response_replies = requests.get(url_replies)
+
+                        if response_replies.status_code == 200:
+                            replies_data = response_replies.json()
+                            if "data" in replies_data and replies_data["data"]:
+                                log(f"   🔄 {len(replies_data['data'])} respostas encontradas para o comentário de {username}:")
+
+                                for reply in replies_data["data"]:
+                                    reply_text = reply.get("text", "")
+                                    reply_username = reply.get("username", "Usuário desconhecido")
+                                    analyze_comment(reply_text, reply_username)
+                        else:
+                            log(f"   ⚠ Erro ao buscar respostas para o comentário {comment_id}: {response_replies.json()}")
 
             time.sleep(3)
 
