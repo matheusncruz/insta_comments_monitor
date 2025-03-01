@@ -4,79 +4,48 @@ import re
 import time
 import streamlit as st
 from docx import Document
-import base64
 
-# **📌 Obtém o caminho absoluto do script**
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-logo_path = os.path.join(BASE_DIR, "logo.png")
-
-# **📌 Função para converter imagem para Base64 (necessário para exibição no Streamlit)**
-def get_base64_of_image(image_path):
-    with open(image_path, "rb") as img_file:
-        return base64.b64encode(img_file.read()).decode()
-
-# **📌 Adicionando CSS personalizado para fixar a logo e melhorar o layout**
+# **📌 Adicionando CSS personalizado para melhorar o layout**
 st.markdown(
-    f"""
+    """
     <style>
-        /* Define a posição fixa da logo no canto superior esquerdo */
-        .logo-container {{
-            position: fixed;
-            top: 50px;
-            left: 10px;
-            width: 150px;
-            z-index: 1000;
-        }}
-
-        /* Ajusta a margem do conteúdo para não ficar sobreposto */
-        .main-content {{
-            margin-left: 180px;
-        }}
-
         /* Fundo da página */
-        .main {{
-            background-color: #f0f2f6;
-        }}
+        .main {
+            background-color: #062C44;
+        }
         
         /* Cor do cabeçalho */
-        .css-18e3th9 {{
-            background-color: #00274D !important;
+        .css-18e3th9 {
+            background-color: #062C44 !important;
             color: white !important;
-        }}
+        }
 
         /* Cor dos botões */
-        .stButton>button {{
-            background-color: #00274D !important;
+        .stButton>button {
+            background-color: #029B7F !important;
             color: white !important;
             border-radius: 5px;
-        }}
+        }
 
         /* Fonte personalizada */
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&display=swap');
-        html, body, [class*="css"] {{
+        html, body, [class*="css"] {
             font-family: 'Montserrat', sans-serif;
-        }}
+        }
     </style>
-    <div class="logo-container">
-        <img src="data:image/png;base64,{get_base64_of_image(logo_path)}" width="150">
-    </div>
     """,
     unsafe_allow_html=True
 )
 
 # **📌 Interface Principal**
-st.markdown('<div class="main-content">', unsafe_allow_html=True)
-
 st.title("📊 Monitoramento de Comentários do Instagram")
 st.write("Insira as configurações abaixo e clique em **Executar** para analisar os comentários.")
 
 # **Inputs do Usuário**
 ACCESS_TOKEN = st.text_input("🔑 Token de Acesso (Graph API)", type="password")
 IG_ACCOUNT_ID = st.text_input("🆔 ID da Conta do Instagram")
-num_posts = st.number_input("📌 Quantidade de Posts a Analisar", min_value=1, max_value=500, value=25)
-keywords = st.text_area("🔍 Palavras-Chave (separe por vírgula)", "CEA, C&A")
-
-st.markdown('</div>', unsafe_allow_html=True)
+num_posts = st.number_input("📌 Quantidade de Posts a Analisar (Do mais recente ao mais antigo)", min_value=1, max_value=500)
+keywords = st.text_area("🔍 Palavras-Chave (separe por vírgula)", "")
 
 # **📌 Botão para rodar o script**
 if st.button("🚀 Executar Análise"):
@@ -154,12 +123,23 @@ if st.button("🚀 Executar Análise"):
 
             time.sleep(3)
 
+        # **📌 Exibir Resultados Finais no Streamlit**
+        log("\n🔍 **Resultados Finais** 🔍")
+        for word, count in keyword_count.items():
+            log(f"A palavra '{word}' foi mencionada {count} vezes.")
+
         # **📌 Criar Relatório Word**
         doc = Document()
         doc.add_heading("Relatório de Comentários do Instagram", level=1)
 
+        # Adiciona os logs ao documento
         for line in log_output:
             doc.add_paragraph(line)
+
+        # **📌 Adiciona a Análise Final no Relatório**
+        doc.add_heading("📊 Análise Final", level=2)
+        for word, count in keyword_count.items():
+            doc.add_paragraph(f"A palavra '{word}' foi mencionada {count} vezes.")
 
         # **📌 Gerar Nome do Arquivo**
         keywords_str = "_".join(word.replace("&", "_") for word in keyword_count.keys())
