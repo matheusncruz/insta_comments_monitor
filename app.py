@@ -22,7 +22,7 @@ st.markdown(
         /* Define a posição fixa da logo no canto superior esquerdo */
         .logo-container {{
             position: fixed;
-            top: 20px;
+            top: 50px;
             left: 10px;
             width: 150px;
             z-index: 1000;
